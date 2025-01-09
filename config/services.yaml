@@ -1,0 +1,73 @@
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+parameters:
+    app.search.engine.wrapper.list: ['solr', 'elasticsearch', 'legacy']
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
+
+    app.search.engine.first_alive:
+        class: App\Search\Wrapper\FirstAliveHandler
+        arguments:
+            $searchEngineAliases: '%app.search.engine.wrapper.list%'
+            $statusServiceLocator: !service_locator
+                legacy: '@app.search.engine.status.legacy'
+                elasticsearch: '@app.search.engine.status.elasticsearch'
+                solr: '@app.search.engine.status.solr'
+
+        tags:
+            - { name: ibexa.search.engine, alias: first_alive }
+
+    app.search.engine.first_alive.indexer:
+        class: App\Search\Wrapper\Indexer
+        arguments:
+            $searchHandler: '@app.search.engine.first_alive'
+        tags:
+            - { name: ibexa.search.engine.indexer, alias: first_alive }
+
+    app.search.engine.status.legacy:
+        class: App\Search\Status\Legacy
+
+    app.search.engine.status.elasticsearch:
+        class: App\Search\Status\Elasticsearch
+        arguments:
+            $baseUrl: '%elasticsearch_dsn%'
+            $httpClient: '@http_client'
+
+    app.search.engine.status.solr:
+        class: App\Search\Status\Solr
+        arguments:
+            $baseUrl: '%solr_dsn%/%solr_core%'
+            $httpClient: '@http_client'
+
+    app.search.engine.full_text:
+        class: App\Search\Wrapper\FullTextHandler
+        arguments:
+            $searchEngineAliases: '%app.search.engine.wrapper.list%'
+        tags:
+            - { name: ibexa.search.engine, alias: full_text }
+
+    app.search.engine.full_text.indexer:
+        class: App\Search\Wrapper\Indexer
+        arguments:
+            $searchHandler: '@app.search.engine.full_text'
+        tags:
+            - { name: ibexa.search.engine.indexer, alias: full_text }
