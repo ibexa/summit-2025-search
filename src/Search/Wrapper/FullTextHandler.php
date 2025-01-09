@@ -47,15 +47,16 @@ class FullTextHandler extends AbstractHandler
         return null !== $this->getCapableSearchEngine($capabilityFlag);
     }
 
-    public function isUsingFullText(Criterion $criteria)
+    public function isUsingFullText(?Criterion $criteria): bool
     {
-         switch ((new \ReflectionClass($criteria))->getShortName()) {
-             case 'FullText': return true;
-             case 'LogicalNot': return $this->isUsingFullText($criteria->criteria[0]);
-             case 'LogicalAnd':
-             case 'LogicalOr':
-                 return $this->isUsingFullText($criteria->criteria[0]) || $this->isUsingFullText($criteria->criteria[1]);
-             default: return false;
+        if (null === $criteria) { return false; }
+        switch ((new \ReflectionClass($criteria))->getShortName()) {
+            case 'FullText': return true;
+            case 'LogicalNot': return $this->isUsingFullText($criteria->criteria[0]);
+            case 'LogicalAnd':
+            case 'LogicalOr':
+                return $this->isUsingFullText($criteria->criteria[0]) || $this->isUsingFullText($criteria->criteria[1]);
+            default: return false;
         }
     }
 
@@ -73,6 +74,14 @@ class FullTextHandler extends AbstractHandler
 
     public function getLocationSearchEngine(LocationQuery $query, array $languageFilter = []): Handler
     {
+        if (0 === $query->limit && false === $query->performCount) {
+            // Avoid "Invalid query. Cannot disable count and request 0 items at the same time."
+            // on \Ibexa\AdminUi\EventListener\ContentTypeSuggestionsListener::getSuggestions($location)
+            if (null !== $searchEngine = $this->getCapableSearchEngine(SearchService::CAPABILITY_AGGREGATIONS)) {
+                return $searchEngine;
+            }
+        }
+
         return $this->isUsingFullText($query->query) || $this->isUsingFullText($query->filter) ?
             $this->getFullTextSearchEngine() : $this->getRegularSearchEngine();
     }
