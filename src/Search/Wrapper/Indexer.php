@@ -12,7 +12,7 @@ use Ibexa\Core\Search\Common\IncrementalIndexer;
 use Psr\Log\LoggerInterface;
 
 /**
- * Search engines wrapper abstract.
+ * Wrapped search engines indexer.
  */
 class Indexer extends IncrementalIndexer
 {
@@ -75,12 +75,12 @@ class Indexer extends IncrementalIndexer
         return $name;
     }
 
-    public function purge()
+    public function purge(): void
     {
         $this->searchHandler->purgeIndex();
     }
 
-    public function updateSearchIndex(array $contentIds, $commit)
+    public function updateSearchIndex(array $contentIds, $commit): void
     {
         foreach ($this->getSearchEngineIndexers() as $searchEngineIndexer) {
             $searchEngineIndexer->updateSearchIndex($contentIds, $commit);

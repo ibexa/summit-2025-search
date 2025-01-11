@@ -24,6 +24,23 @@ services:
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
+    # Index
+
+    App\Search\Index\Solr\ContentTypeIdentifier:
+        tags: [ibexa.search.solr.field.mapper.block]
+
+    #App\Search\Index\Elasticsearch\ContentTypeIdentifier: Automatically well configured
+
+    # Criterion
+
+    App\Search\Query\Criterion\Visitor\Elasticsearch\ContentTypeIdentifier:
+        decorates: Ibexa\Elasticsearch\Query\CriterionVisitor\ContentTypeIdentifierVisitor
+
+    App\Search\Query\Criterion\Visitor\Solr\ContentTypeIdentifier:
+        decorates: Ibexa\Solr\Query\Common\CriterionVisitor\ContentTypeIdentifierIn
+
+    # Search Engine Wrapper
+
     app.search.engine.first_alive:
         class: App\Search\Wrapper\FirstAliveHandler
         arguments:
@@ -58,16 +75,16 @@ services:
             $baseUrl: '%solr_dsn%/%solr_core%'
             $httpClient: '@http_client'
 
-    app.search.engine.full_text:
-        class: App\Search\Wrapper\FullTextHandler
+    app.search.engine.less_capable:
+        class: App\Search\Wrapper\LessCapableHandler
         arguments:
             $searchEngineAliases: '%app.search.engine.wrapper.list%'
         tags:
-            - { name: ibexa.search.engine, alias: full_text }
+            - { name: ibexa.search.engine, alias: less_capable }
 
-    app.search.engine.full_text.indexer:
+    app.search.engine.less_capable.indexer:
         class: App\Search\Wrapper\Indexer
         arguments:
-            $searchHandler: '@app.search.engine.full_text'
+            $searchHandler: '@app.search.engine.less_capable'
         tags:
-            - { name: ibexa.search.engine.indexer, alias: full_text }
+            - { name: ibexa.search.engine.indexer, alias: less_capable }
