@@ -24,7 +24,8 @@ class LessCapableHandler extends AbstractHandler
      *
      * The limitation is that there might not be an engine supporting a combination of different capabilities.
      * The following case code could potentially throw an exception
-     * if there is no single engine supporting both capabilities at the same time:
+     * if there is no single engine supporting both capabilities at the same time
+     * while an engine supports one capabity and another engine supports the other capability:
      * ```
      * if ($this->supports($cap1) && $this->support($cap2)) {
      *     $this->getLessCapableSearchEngine([$cap1, $cap2])
@@ -52,6 +53,7 @@ class LessCapableHandler extends AbstractHandler
      *     - {@see SearchService::CAPABILITY_ADVANCED_FULLTEXT}
      *     - {@see SearchService::CAPABILITY_AGGREGATIONS}
      * @throws \InvalidArgumentException if no search engine covers the given capabilities.
+     * @throws \RuntimeException if no search engine where found for unknown reason.
      */
     public function getLessCapableSearchEngine(array $neededCapabilities): Handler
     {
@@ -84,9 +86,10 @@ class LessCapableHandler extends AbstractHandler
         }
         if (!empty($unknownCapabilities)) {
             throw new \InvalidArgumentException('Unknown search engine capability(ies): ' . implode(', ', $unknownCapabilities));
-        } else {
+        } else if (!empty($unsupportedCapabilities)) {
             throw new \InvalidArgumentException('No search engine found to support the following capability(ies): ' . implode(', ', $unsupportedCapabilities));
         }
+        throw new \RuntimeException('No search engine found.');
     }
 
     public function getQueryNeededCapabilities(Query $query): array

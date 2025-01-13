@@ -34,11 +34,14 @@ abstract class AbstractHandler implements VersatileHandler
 
     protected SearchEngineFactory $searchEngineFactory;
 
-    /** @param string[] $searchEngineAliases */
+    /** @param array<int, string> $searchEngineAliases */
     public function __construct(
         SearchEngineFactory $searchEngineFactory,
         array $searchEngineAliases = ['legacy']
     ) {
+        if (empty($searchEngineAliases)) {
+            throw new \InvalidArgumentException('Search engine alias list must not be empty.');
+        }
         $this->searchEngineAliases = $searchEngineAliases;
         $this->searchEngineFactory = $searchEngineFactory;
     }
