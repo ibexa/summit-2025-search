@@ -19,6 +19,18 @@ use Ibexa\Contracts\Core\Search\Handler;
  */
 class LessCapableHandler extends AbstractHandler
 {
+    /**
+     * True if there is a search engine supporting a given capability.
+     *
+     * The limitation is that there might not be an engine supporting a combination of different capabilities.
+     * The following case code could potentially throw an exception
+     * if there is no single engine supporting both capabilities at the same time:
+     * ```
+     * if ($this->supports($cap1) && $this->support($cap2)) {
+     *     $this->getLessCapableSearchEngine([$cap1, $cap2])
+     * }
+     * ```
+     */
     public function supports(int $capabilityFlag): bool
     {
         try {
@@ -29,12 +41,19 @@ class LessCapableHandler extends AbstractHandler
     }
 
     /**
-     * @param array<int, int> $neededCapabilities List of needed search service capabilities
+     * Returns the search engine which supports the given capabilities.
+     *
+     * It tests search engines from last to first.
+     * At construction time, the search engine list must be
+     * given already sorted from most capable to less capable.
+     *
+     * @param array<int, int> $neededCapabilities List of needed search service capabilities.
      *     - {@see SearchService::CAPABILITY_SCORING}
      *     - {@see SearchService::CAPABILITY_ADVANCED_FULLTEXT}
      *     - {@see SearchService::CAPABILITY_AGGREGATIONS}
+     * @throws \InvalidArgumentException if no search engine covers the given capabilities.
      */
-    public function getLessCapableSearchEngine(array $neededCapabilities): /*?*/Handler
+    public function getLessCapableSearchEngine(array $neededCapabilities): Handler
     {
         foreach (array_reverse($this->getSearchEngines()) as $searchEngine) {
             foreach ($neededCapabilities as $capability) {
@@ -42,14 +61,16 @@ class LessCapableHandler extends AbstractHandler
                     continue 2;
                 }
             }
+            //dump(get_class($searchEngine), get_parent_class($searchEngine));//DEBUG
 
             return $searchEngine;
         }
 
-        //TODO: Return a default search engine? Return the most capable search engine? Or throw an error?
-        //      For example, legacy support FullText criterion even if it doesn't support CAPABILITY_ADVANCED_FULLTEXT
-        //return $this->getSearchEngines()[0];
-        //return null;
+        if (in_array(SearchService::CAPABILITY_ADVANCED_FULLTEXT, $neededCapabilities)) {
+            // Legacy engine supports `FullText` criterion even if it doesn't support `CAPABILITY_ADVANCED_FULLTEXT`.
+            return $this->getLessCapableSearchEngine(array_diff($neededCapabilities, [SearchService::CAPABILITY_ADVANCED_FULLTEXT]));
+        }
+
         $searchServiceClass = new \ReflectionClass(SearchService::class);
         $searchServiceCapabilityConstantNames = array_flip($searchServiceClass->getConstants());
         $unsupportedCapabilities = [];
@@ -62,9 +83,9 @@ class LessCapableHandler extends AbstractHandler
             }
         }
         if (!empty($unknownCapabilities)) {
-            throw new \InvalidArgumentException('Unknown search engine capapility(ies): ' . implode(', ', $unknownCapabilities));
+            throw new \InvalidArgumentException('Unknown search engine capability(ies): ' . implode(', ', $unknownCapabilities));
         } else {
-            throw new \InvalidArgumentException('No search engine found to support the following capapility(ies): ' . implode(', ', $unsupportedCapabilities));
+            throw new \InvalidArgumentException('No search engine found to support the following capability(ies): ' . implode(', ', $unsupportedCapabilities));
         }
     }
 
