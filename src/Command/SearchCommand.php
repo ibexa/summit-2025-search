@@ -2,11 +2,15 @@
 
 namespace App\Command;
 
+use App\Search\Query as CustomQuery;
 use Ibexa\Contracts\Core\Repository\SearchService;
 use Ibexa\Contracts\Core\Repository\Values\Content\Content;
+use Ibexa\Contracts\Core\Repository\Values\Content\ContentInfo;
 use Ibexa\Contracts\Core\Repository\Values\Content\Location;
 use Ibexa\Contracts\Core\Repository\Values\Content\LocationQuery;
 use Ibexa\Contracts\Core\Repository\Values\Content\Query;
+use Ibexa\Contracts\Core\Repository\Values\Content\Search\AggregationResult;
+use Ibexa\Core\Repository\Values\ContentType\ContentType;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -32,30 +36,37 @@ class SearchCommand extends Command
     {
         $text = implode(' ', $input->getArgument('text'));
 
-        $query = new Query(['query' => new Query\Criterion\FullText($text)]);
-        //$query = new Query(['query' => new Query\Criterion\ContentTypeIdentifier('folder')]);
-        $searchResult = $this->searchService->findContent($query);
+        //$query = new Query(['query' => new Query\Criterion\FullText($text)]);
+        //$query = new Query(['filter' => new Query\Criterion\ContentTypeIdentifier('landing_page')]);
+        /* */
+        $query = new Query([
+            'filter' => new Query\Criterion\ContentTypeIdentifier(['landing_page', 'folder']),
+            'sortClauses' => [
+                new CustomQuery\SortClause\ContentTypeIdentifier(Query::SORT_DESC),
+                new Query\SortClause\ContentName(),
+            ],
+            //'aggregations' => [new Query\Aggregation\ContentTypeTermAggregation('content_type')],
+            //'aggregations' => [new CustomQuery\Aggregation\ContentTypeIdentifier('content_type')],
+            'limit' => 100,
+        ]);
+        /* */
+        $searchResult = $this->searchService->findContentInfo($query);
         foreach ($searchResult->searchHits as $searchHit) {
             $scorePercent = $searchResult->maxScore ?
                 str_pad(round(100 * $searchHit->score / $searchResult->maxScore), 3, ' ', STR_PAD_LEFT) . '% '
                 : '';
-            /** @var Content $content */
-            $content = $searchHit->valueObject;
-            $output->writeln("{$scorePercent}{$content->getName()}");
+            /** @var ContentInfo $contentInfo */
+            $contentInfo = $searchHit->valueObject;
+            $output->writeln("{$scorePercent}{$contentInfo->getName()} ({$contentInfo->getContentType()->identifier})");
         }
-
-        return Command::SUCCESS;
-
-        $locationQuery = new LocationQuery(['query' => new Query\Criterion\FullText($text)]);
-        //$locationQuery = new LocationQuery(['filter' => new Query\Criterion\ContentTypeIdentifier('folder')]);
-        $searchResult = $this->searchService->findLocations($locationQuery);
-        foreach ($searchResult->searchHits as $searchHit) {
-            $scorePercent = $searchResult->maxScore ?
-                str_pad(round(100 * $searchHit->score / $searchResult->maxScore), 3, ' ', STR_PAD_LEFT) . '% '
-                : '';
-            /** @var Location $location */
-            $location = $searchHit->valueObject;
-            $output->writeln("{$scorePercent}{$location->contentInfo->getName()}");
+        if (!empty($searchResult->aggregations)) {
+            /** @var AggregationResult\TermAggregationResult $aggregation */
+            foreach ($searchResult->aggregations as $aggregation) {
+                /** @var AggregationResult\TermAggregationResultEntry $entry */
+                foreach ($aggregation->getEntries() as $entry) {
+                    echo "{$entry->getKey()->getIdentifier()}: {$entry->getCount()}\n";
+                }
+            }
         }
 
         return Command::SUCCESS;

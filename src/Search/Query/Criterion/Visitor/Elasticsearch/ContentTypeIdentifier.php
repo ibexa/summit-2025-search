@@ -4,20 +4,23 @@ declare(strict_types=1);
 
 namespace App\Search\Query\Criterion\Visitor\Elasticsearch;
 
+use App\Search\Index\ContentTypeIdentifierTrait;
 use Ibexa\Contracts\Core\Repository\Values\Content\Query\Criterion;
 use Ibexa\Contracts\Elasticsearch\Query\CriterionVisitor;
 use Ibexa\Contracts\Elasticsearch\Query\LanguageFilter;
-use Ibexa\Elasticsearch\ElasticSearch\QueryDSL\TermsQuery;
+use Ibexa\Elasticsearch\Query\CriterionVisitor\AbstractTermsVisitor;
 
-class ContentTypeIdentifier implements CriterionVisitor
+class ContentTypeIdentifier extends AbstractTermsVisitor implements CriterionVisitor
 {
+    use ContentTypeIdentifierTrait;
+
     public function supports(Criterion $criterion, LanguageFilter $languageFilter): bool
     {
         return $criterion instanceof Criterion\ContentTypeIdentifier;
     }
 
-    public function visit(CriterionVisitor $dispatcher, Criterion $criterion, LanguageFilter $languageFilter): array
+    protected function getTargetField(Criterion $criterion): string
     {
-        return (new TermsQuery('content_type_identifier', $criterion->value))->toArray();
+        return self::FIELD_IDENTIFIER;
     }
 }

@@ -19,7 +19,7 @@ use Ibexa\Contracts\Core\Search\VersatileHandler;
  * Base logic for a search handler having a list of search engines.
  * It performs indexing on all its search engines.
  * It performs search query on one search engine,
- * and the final child class has to implement how this search engine is selected.
+ * and the child class has to implement how this search engine is selected.
  */
 abstract class AbstractHandler implements VersatileHandler
 {

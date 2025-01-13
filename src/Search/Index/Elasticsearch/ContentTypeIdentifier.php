@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Search\Index\Elasticsearch;
 
+use App\Search\Index\ContentTypeIdentifierTrait;
 use Ibexa\Contracts\Core\Repository\ContentTypeService;
 use Ibexa\Contracts\Core\Search\Field;
 use Ibexa\Contracts\Core\Search\FieldType\IdentifierField;
@@ -13,6 +14,8 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class ContentTypeIdentifier implements EventSubscriberInterface
 {
+    use ContentTypeIdentifierTrait;
+
     private ContentTypeService $contentTypeService;
 
     public function __construct(ContentTypeService $contentTypeService)
@@ -33,6 +36,6 @@ class ContentTypeIdentifier implements EventSubscriberInterface
     {
         $document = $event->getDocument();
         $contentTypeIdentifier = $this->contentTypeService->loadContentType($document->contentTypeId)->getIdentifier();
-        $document->fields[] = new Field('content_type_identifier', $contentTypeIdentifier, new IdentifierField());
+        $document->fields[] = new Field(self::FIELD_NAME, $contentTypeIdentifier, self::getFieldType());
     }
 }
