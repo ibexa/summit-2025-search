@@ -42,11 +42,11 @@ class SearchCommand extends Command
         $query = new Query([
             'filter' => new Query\Criterion\ContentTypeIdentifier(['landing_page', 'folder']),
             'sortClauses' => [
-                new CustomQuery\SortClause\ContentTypeIdentifier(Query::SORT_DESC),
+                new CustomQuery\SortClause\ContentTypeIdentifier(/* * /Query::SORT_DESC/**/),
                 new Query\SortClause\ContentName(),
             ],
-            //'aggregations' => [new Query\Aggregation\ContentTypeTermAggregation('content_type')],
-            //'aggregations' => [new CustomQuery\Aggregation\ContentTypeIdentifier('content_type')],
+            //'aggregations' => [new Query\Aggregation\ContentTypeTermAggregation('Content types')],
+            'aggregations' => [new CustomQuery\Aggregation\ContentTypeIdentifier('Content types')],
             'limit' => 100,
         ]);
         /* */
@@ -57,14 +57,15 @@ class SearchCommand extends Command
                 : '';
             /** @var ContentInfo $contentInfo */
             $contentInfo = $searchHit->valueObject;
-            $output->writeln("{$scorePercent}{$contentInfo->getName()} ({$contentInfo->getContentType()->identifier})");
+            $output->writeln("{$scorePercent}{$contentInfo->getName()} [{$contentInfo->getContentType()->getName()} ({$contentInfo->getContentType()->getIdentifier()})]");
         }
         if (!empty($searchResult->aggregations)) {
             /** @var AggregationResult\TermAggregationResult $aggregation */
             foreach ($searchResult->aggregations as $aggregation) {
+                echo "-- {$aggregation->getName()} --\n";
                 /** @var AggregationResult\TermAggregationResultEntry $entry */
                 foreach ($aggregation->getEntries() as $entry) {
-                    echo "{$entry->getKey()->getIdentifier()}: {$entry->getCount()}\n";
+                    echo "{$entry->getKey()->getName()} ({$entry->getKey()->getIdentifier()}): {$entry->getCount()}\n";
                 }
             }
         }

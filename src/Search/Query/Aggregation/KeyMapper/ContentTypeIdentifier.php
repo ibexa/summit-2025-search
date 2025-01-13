@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Search\Query\Aggregation\KeyMapper;
 
 use Ibexa\Contracts\Core\Repository\ContentTypeService;
+use Ibexa\Contracts\Core\Repository\Exceptions\NotFoundException;
 use Ibexa\Contracts\Core\Repository\Values\Content\Query\Aggregation;
 use Ibexa\Contracts\Elasticsearch\Query\LanguageFilter;
 use Ibexa\Elasticsearch\Query\ResultExtractor\AggregationResultExtractor\TermAggregationKeyMapper as ElasticsearchTermAggregationKeyMapper;
@@ -20,14 +21,15 @@ class ContentTypeIdentifier implements ElasticsearchTermAggregationKeyMapper, So
         $this->contentTypeService = $contentTypeService;
     }
 
+    /** @throws NotFoundException if the index contains a document of unknown content type; Consider reindex.*/
     public function map(Aggregation $aggregation, LanguageFilter|array $languageFilter, array $keys): array
     {
-        $result = [];
+        $map = [];
 
         foreach ($keys as $key) {
-            $result[$key] = $this->contentTypeService->loadContentTypeByIdentifier($key);
+            $map[$key] = $this->contentTypeService->loadContentTypeByIdentifier($key);
         }
 
-        return $result;
+        return $map;
     }
 }

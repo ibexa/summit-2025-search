@@ -6,6 +6,6 @@ namespace App\Search\Query\Aggregation;
 
 use Ibexa\Contracts\Core\Repository\Values\Content\Query\Aggregation;
 
-class ContentTypeIdentifier extends Aggregation\AbstractTermAggregation implements Aggregation
+class ContentTypeIdentifier extends Aggregation\AbstractTermAggregation// implements Aggregation
 {
 }
