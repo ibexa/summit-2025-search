@@ -114,14 +114,14 @@ abstract class AbstractHandler implements VersatileHandler
         }
     }
 
-    public function indexContent(Content $content)
+    public function indexContent(Content $content): void
     {
         foreach ($this->getSearchEngines() as $searchEngine) {
             $searchEngine->indexContent($content);
         }
     }
 
-    public function deleteContent($contentId, $versionId = null)
+    public function deleteContent($contentId, $versionId = null): void
     {
         foreach ($this->getSearchEngines() as $searchEngine) {
             $searchEngine->deleteContent($contentId, $versionId);
