@@ -13,7 +13,7 @@ trait ContentTypeIdentifierTrait
 
     static public function getFieldType(): FieldType
     {
-        //return new FieldType\IdentifierField();//Doesn't accept underscores, silently remove them.
+        //return new FieldType\IdentifierField(); // Doesn't accept underscores, silently remove them (e.g. `content_type_identifier_id: landingpage`).
         return new FieldType\StringField();
     }
 }

@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Search\Query as CustomQuery;
 use Ibexa\Contracts\Core\Repository\ContentService;
+use Ibexa\Contracts\Core\Repository\LocationService;
 use Ibexa\Contracts\Core\Repository\SearchService;
 use Ibexa\Contracts\Core\Repository\Values\Content\Content;
 use Ibexa\Contracts\Core\Repository\Values\Content\ContentInfo;
@@ -23,11 +24,13 @@ class SearchCommand extends Command
     protected static $defaultName = 'app:search';
     private SearchService $searchService;
     private ContentService $contentService;
+    private LocationService $locationService;
 
-    public function __construct(SearchService $searchService, ContentService $contentService)
+    public function __construct(SearchService $searchService, ContentService $contentService, LocationService $locationService)
     {
         $this->searchService = $searchService;
         $this->contentService = $contentService;
+        $this->locationService = $locationService;
         parent::__construct();
     }
 
@@ -38,15 +41,18 @@ class SearchCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        echo "= Search =\n";
+
         $text = implode(' ', $input->getArgument('text'));
 
         //$query = new Query(['query' => new Query\Criterion\FullText($text)]);
         $query = new Query(['filter' => new Query\Criterion\ContentTypeIdentifier('landing_page')]);
         /* * /
+        //$query = new Query([
         $query = new LocationQuery([
             'filter' => new Query\Criterion\ContentTypeIdentifier(['landing_page', 'folder']),
             'sortClauses' => [
-                new CustomQuery\SortClause\ContentTypeIdentifier(Query::SORT_ASC),
+                new CustomQuery\SortClause\ContentTypeIdentifier(),
                 new Query\SortClause\ContentName(),
             ],
             //'aggregations' => [new Query\Aggregation\ContentTypeTermAggregation('Content types')],
@@ -100,9 +106,19 @@ class SearchCommand extends Command
 
         //return Command::SUCCESS;
 
-        $filter = new Filter(new Query\Criterion\ContentTypeIdentifier('landing_page'));
-        $contentList = $this->contentService->find($filter);
-        dump($contentList->getTotalCount());
+        echo "= Filter =\n";
+        $filter = new Filter(new Query\Criterion\ContentTypeIdentifier(['folder', 'landing_page']), [
+            new CustomQuery\SortClause\ContentTypeIdentifier(Query::SORT_DESC),
+            new Query\SortClause\ContentName(Query::SORT_DESC)
+        ]);
+        /** @var Content $content */
+        foreach ($this->contentService->find($filter)->getIterator() as $content) {
+            echo "{$content->getName()} ({$content->getContentType()->getIdentifier()})\n";
+        }
+        /** @var Location $content */
+        foreach ($this->locationService->find($filter)->getIterator() as $content) {
+            echo "{$content->getContentInfo()->getName()} ({$content->getContentInfo()->getContentType()->getIdentifier()})\n";
+        }
 
         return Command::SUCCESS;
     }

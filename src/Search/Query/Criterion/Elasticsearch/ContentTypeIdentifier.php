@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Search\Query\Criterion\Visitor\Elasticsearch;
+namespace App\Search\Query\Criterion\Elasticsearch;
 
 use App\Search\Index\ContentTypeIdentifierTrait;
 use Ibexa\Contracts\Core\Repository\Values\Content\Query\Criterion;

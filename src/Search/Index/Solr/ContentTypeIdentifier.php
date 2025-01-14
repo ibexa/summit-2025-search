@@ -8,7 +8,6 @@ use App\Search\Index\ContentTypeIdentifierTrait;
 use Ibexa\Contracts\Core\Persistence\Content as SPIContent;
 use Ibexa\Contracts\Core\Repository\ContentTypeService;
 use Ibexa\Contracts\Core\Search\Field;
-use Ibexa\Contracts\Core\Search\FieldType\IdentifierField;
 use Ibexa\Contracts\Solr\FieldMapper\ContentFieldMapper;
 
 class ContentTypeIdentifier extends ContentFieldMapper

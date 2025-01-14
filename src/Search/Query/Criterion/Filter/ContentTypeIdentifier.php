@@ -23,14 +23,16 @@ class ContentTypeIdentifier implements CriterionQueryBuilder
     {
         //dump('\App\Search\Query\Criterion\Filter\ContentTypeIdentifier::buildQueryConstraint');
         $subSelect = $queryBuilder->getConnection()->createQueryBuilder();
-        $subSelect->select(['id'])
+        $subSelect
+            ->select(['id'])
             ->from(ContentTypeGateway::CONTENT_TYPE_TABLE)
             ->where(
                 $queryBuilder->expr()->in(
                     'identifier',
                     $queryBuilder->createNamedParameter($criterion->value, Connection::PARAM_STR_ARRAY)
                 )
-            );
+            )
+        ;
 
         return $queryBuilder->expr()->in(
             'content.contentclass_id',

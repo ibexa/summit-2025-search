@@ -33,13 +33,13 @@ services:
 
     # Criterion
 
-    App\Search\Query\Criterion\Visitor\Elasticsearch\ContentTypeIdentifier:
+    App\Search\Query\Criterion\Elasticsearch\ContentTypeIdentifier:
         decorates: Ibexa\Elasticsearch\Query\CriterionVisitor\ContentTypeIdentifierVisitor
         #tags:
         #    - ibexa.search.elasticsearch.query.content.criterion.visitor
         #    - ibexa.search.elasticsearch.query.location.criterion.visitor
 
-    App\Search\Query\Criterion\Visitor\Legacy\ContentTypeIdentifier:
+    App\Search\Query\Criterion\Legacy\ContentTypeIdentifier:
         decorates: Ibexa\Core\Search\Legacy\Content\Common\Gateway\CriterionHandler\ContentTypeIdentifier
         #tags:
         #    - ibexa.search.legacy.gateway.criterion_handler.content
@@ -49,8 +49,7 @@ services:
         decorates: Ibexa\Core\Persistence\Legacy\Filter\CriterionQueryBuilder\Content\Type\IdentifierQueryBuilder
         #tags: [ibexa.filter.criterion.query.builder]
 
-
-    App\Search\Query\Criterion\Visitor\Solr\ContentTypeIdentifier:
+    App\Search\Query\Criterion\Solr\ContentTypeIdentifier:
         decorates: Ibexa\Solr\Query\Common\CriterionVisitor\ContentTypeIdentifierIn
         #tags:
         #    - ibexa.search.solr.query.content.criterion.visitor

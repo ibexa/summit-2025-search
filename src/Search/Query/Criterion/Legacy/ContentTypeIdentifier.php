@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Search\Query\Criterion\Visitor\Legacy;
+namespace App\Search\Query\Criterion\Legacy;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
@@ -13,7 +13,6 @@ use Ibexa\Core\Search\Legacy\Content\Common\Gateway\CriterionHandler;
 
 class ContentTypeIdentifier extends CriterionHandler
 {
-
     public function accept(Criterion $criterion): bool
     {
         return $criterion instanceof Criterion\ContentTypeIdentifier;
@@ -24,26 +23,28 @@ class ContentTypeIdentifier extends CriterionHandler
         //dump('\App\Search\Query\Criterion\Visitor\Legacy\ContentTypeIdentifier::handle');
         /* */
         $subSelect = $this->connection->createQueryBuilder();
-        $subSelect->select(['id'])
+        $subSelect
+            ->select(['id'])
             ->from(ContentTypeGateway::CONTENT_TYPE_TABLE)
             ->where(
                 $queryBuilder->expr()->in(
                     'identifier',
                     $queryBuilder->createNamedParameter($criterion->value, Connection::PARAM_STR_ARRAY)
                 )
-            );
+            )
+        ;
 
         return $queryBuilder->expr()->in(
             'c.contentclass_id',
             $subSelect->getSQL()
         );
-        /* * /
+        /* */
         if (!$this->hasJoinedTableAs($queryBuilder, 'ct')) {
             $queryBuilder->innerJoin(
                 'c',
                 ContentTypeGateway::CONTENT_TYPE_TABLE,
                 'ct',
-                'c.contentclass_id = ct.id'
+                'c.contentclass_id = ct.id AND ct.version = 0'
             );
         }
 
@@ -51,6 +52,5 @@ class ContentTypeIdentifier extends CriterionHandler
             'ct.identifier',
             $queryBuilder->createNamedParameter($criterion->value, Connection::PARAM_STR_ARRAY)
         );
-        /* */
     }
 }

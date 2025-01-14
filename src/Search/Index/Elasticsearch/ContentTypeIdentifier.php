@@ -7,7 +7,6 @@ namespace App\Search\Index\Elasticsearch;
 use App\Search\Index\ContentTypeIdentifierTrait;
 use Ibexa\Contracts\Core\Repository\ContentTypeService;
 use Ibexa\Contracts\Core\Search\Field;
-use Ibexa\Contracts\Core\Search\FieldType\IdentifierField;
 use Ibexa\Contracts\Elasticsearch\Mapping\Event\ContentIndexCreateEvent;
 use Ibexa\Contracts\Elasticsearch\Mapping\Event\LocationIndexCreateEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;

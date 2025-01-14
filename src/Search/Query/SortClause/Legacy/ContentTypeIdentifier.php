@@ -12,7 +12,6 @@ use Ibexa\Core\Search\Legacy\Content\Common\Gateway\SortClauseHandler;
 
 class ContentTypeIdentifier extends SortClauseHandler
 {
-
     public function accept(SortClause $sortClause)
     {
         return $sortClause instanceof ContentTypeIdentifierSortClause;
