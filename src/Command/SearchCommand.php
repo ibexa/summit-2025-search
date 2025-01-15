@@ -13,7 +13,6 @@ use Ibexa\Contracts\Core\Repository\Values\Content\LocationQuery;
 use Ibexa\Contracts\Core\Repository\Values\Content\Query;
 use Ibexa\Contracts\Core\Repository\Values\Content\Search\AggregationResult;
 use Ibexa\Contracts\Core\Repository\Values\Filter\Filter;
-use Ibexa\Core\Repository\Values\ContentType\ContentType;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -46,7 +45,8 @@ class SearchCommand extends Command
         $text = implode(' ', $input->getArgument('text'));
 
         //$query = new Query(['query' => new Query\Criterion\FullText($text)]);
-        $query = new Query(['filter' => new Query\Criterion\ContentTypeIdentifier('landing_page')]);
+        //$query = new Query(['filter' => new Query\Criterion\ContentTypeIdentifier('landing_page')]);
+        $query = new Query(['filter' => new Query\Criterion\ContentTypeIdentifier(['landing_page', 'folder'])]);
         /* * /
         //$query = new Query([
         $query = new LocationQuery([
@@ -107,7 +107,7 @@ class SearchCommand extends Command
         //return Command::SUCCESS;
 
         echo "= Filter =\n";
-        $filter = new Filter(new Query\Criterion\ContentTypeIdentifier(['folder', 'landing_page']), [
+        $filter = new Filter(new Query\Criterion\ContentTypeIdentifier(['landing_page', 'folder']), [
             new CustomQuery\SortClause\ContentTypeIdentifier(Query::SORT_DESC),
             new Query\SortClause\ContentName(Query::SORT_DESC)
         ]);
