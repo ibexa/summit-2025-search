@@ -8,7 +8,9 @@ use Ibexa\Contracts\Core\Repository\LocationService;
 use Ibexa\Contracts\Core\Repository\SearchService;
 use Ibexa\Contracts\Core\Repository\Values\Content\Content;
 use Ibexa\Contracts\Core\Repository\Values\Content\ContentInfo;
+use Ibexa\Contracts\Core\Repository\Values\Content\ContentList;
 use Ibexa\Contracts\Core\Repository\Values\Content\Location;
+use Ibexa\Contracts\Core\Repository\Values\Content\LocationList;
 use Ibexa\Contracts\Core\Repository\Values\Content\LocationQuery;
 use Ibexa\Contracts\Core\Repository\Values\Content\Query;
 use Ibexa\Contracts\Core\Repository\Values\Content\Search\AggregationResult;
@@ -42,10 +44,10 @@ class SearchCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $text = implode(' ', $input->getArgument('text'));
-
         //$query = new Query(['query' => new Query\Criterion\FullText($text)]);
+
         //$query = new Query(['filter' => new Query\Criterion\ContentTypeIdentifier('landing_page')]);
-        $query = new Query(['filter' => new Query\Criterion\ContentTypeIdentifier(['landing_page', 'folder'])]);
+        $query = new LocationQuery(['filter' => new Query\Criterion\ContentTypeIdentifier(['landing_page', 'folder'])]);
         /* * /
         //$query = new Query([
         $query = new LocationQuery([
@@ -60,33 +62,25 @@ class SearchCommand extends Command
         ]);
         /* */
 
-        $searchResult = $this->searchService->findContentInfo($query);
-        //$searchResult = $this->searchService->findContent($query);
-        //$searchResult = $this->searchService->findLocations($query);
-
-        $this->displaySearchResult($searchResult, $output);
+        $this->displaySearchResult($this->searchService->findContentInfo($query), $output, 'SearchService::findContentInfo()');
+        $this->displaySearchResult($this->searchService->findContent($query), $output, 'SearchService::findContent()');
+        $this->displaySearchResult($this->searchService->findLocations($query), $output, 'SearchService::findLocations()');
 
         //return Command::SUCCESS;
 
-        $output->writeln('<info>= Filter =</info>');
         $filter = new Filter(new Query\Criterion\ContentTypeIdentifier(['landing_page', 'folder']), [
             new CustomQuery\SortClause\ContentTypeIdentifier(Query::SORT_DESC),
             new Query\SortClause\ContentName(Query::SORT_DESC)
         ]);
-        /** @var Content $content */
-        foreach ($this->contentService->find($filter)->getIterator() as $content) {
-            $output->writeln("{$content->getName()} ({$content->getContentType()->getIdentifier()})");
-        }
-        /** @var Location $content */
-        foreach ($this->locationService->find($filter)->getIterator() as $content) {
-            $output->writeln("{$content->getContentInfo()->getName()} ({$content->getContentInfo()->getContentType()->getIdentifier()})");
-        }
+
+        $this->displayFilterResult($this->contentService->find($filter), $output, 'ContentService::find()');
+        $this->displayFilterResult($this->locationService->find($filter), $output, 'LocationService::find()');
 
         return Command::SUCCESS;
     }
 
-    private function displaySearchResult(SearchResult $searchResult, OutputInterface $output) {
-        $output->writeln('<info>= Search Result =</info>');
+    private function displaySearchResult(SearchResult $searchResult, OutputInterface $output, $title = 'Search Result') {
+        $output->writeln("<info>= $title =</info>");
         foreach ($searchResult->searchHits as $searchHit) {
             $scorePercent = $searchResult->maxScore ?
                 str_pad(round(100 * $searchHit->score / $searchResult->maxScore), 3, ' ', STR_PAD_LEFT) . '% '
@@ -124,6 +118,24 @@ class SearchCommand extends Command
                     $output->writeln("{$entry->getKey()->getName()} ({$entry->getKey()->getIdentifier()}): {$entry->getCount()}");
                 }
             }
+        }
+    }
+
+    private function displayFilterResult(ContentList|LocationList $list, OutputInterface $output, $title = 'Filter Result') {
+        $output->writeln("<info>= $title =</info>");
+        switch (get_class($list)) {
+            case LocationList::class:
+                /** @var Location $location */
+                foreach ($list->getIterator() as $location) {
+                    $output->writeln("{$location->getContentInfo()->getName()} ({$location->getContentInfo()->getContentType()->getIdentifier()})");
+                }
+                break;
+            case ContentList::class:
+                /** @var Content $content */
+                foreach ($list->getIterator() as $content) {
+                    $output->writeln("{$content->getName()} ({$content->getContentType()->getIdentifier()})");
+                }
+                break;
         }
     }
 }
