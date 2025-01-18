@@ -12,6 +12,7 @@ use Ibexa\Contracts\Core\Repository\Values\Content\Location;
 use Ibexa\Contracts\Core\Repository\Values\Content\LocationQuery;
 use Ibexa\Contracts\Core\Repository\Values\Content\Query;
 use Ibexa\Contracts\Core\Repository\Values\Content\Search\AggregationResult;
+use Ibexa\Contracts\Core\Repository\Values\Content\Search\SearchResult;
 use Ibexa\Contracts\Core\Repository\Values\Filter\Filter;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -40,8 +41,6 @@ class SearchCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        echo "= Search =\n";
-
         $text = implode(' ', $input->getArgument('text'));
 
         //$query = new Query(['query' => new Query\Criterion\FullText($text)]);
@@ -65,6 +64,29 @@ class SearchCommand extends Command
         //$searchResult = $this->searchService->findContent($query);
         //$searchResult = $this->searchService->findLocations($query);
 
+        $this->displaySearchResult($searchResult, $output);
+
+        //return Command::SUCCESS;
+
+        $output->writeln('<info>= Filter =</info>');
+        $filter = new Filter(new Query\Criterion\ContentTypeIdentifier(['landing_page', 'folder']), [
+            new CustomQuery\SortClause\ContentTypeIdentifier(Query::SORT_DESC),
+            new Query\SortClause\ContentName(Query::SORT_DESC)
+        ]);
+        /** @var Content $content */
+        foreach ($this->contentService->find($filter)->getIterator() as $content) {
+            $output->writeln("{$content->getName()} ({$content->getContentType()->getIdentifier()})");
+        }
+        /** @var Location $content */
+        foreach ($this->locationService->find($filter)->getIterator() as $content) {
+            $output->writeln("{$content->getContentInfo()->getName()} ({$content->getContentInfo()->getContentType()->getIdentifier()})");
+        }
+
+        return Command::SUCCESS;
+    }
+
+    private function displaySearchResult(SearchResult $searchResult, OutputInterface $output) {
+        $output->writeln('<info>= Search Result =</info>');
         foreach ($searchResult->searchHits as $searchHit) {
             $scorePercent = $searchResult->maxScore ?
                 str_pad(round(100 * $searchHit->score / $searchResult->maxScore), 3, ' ', STR_PAD_LEFT) . '% '
@@ -96,30 +118,12 @@ class SearchCommand extends Command
         if (!empty($searchResult->aggregations)) {
             /** @var AggregationResult\TermAggregationResult $aggregation */
             foreach ($searchResult->aggregations as $aggregation) {
-                echo "-- {$aggregation->getName()} aggregation --\n";
+                $output->writeln("<comment>-- {$aggregation->getName()} aggregation --</comment>");
                 /** @var AggregationResult\TermAggregationResultEntry $entry */
                 foreach ($aggregation->getEntries() as $entry) {
-                    echo "{$entry->getKey()->getName()} ({$entry->getKey()->getIdentifier()}): {$entry->getCount()}\n";
+                    $output->writeln("{$entry->getKey()->getName()} ({$entry->getKey()->getIdentifier()}): {$entry->getCount()}");
                 }
             }
         }
-
-        //return Command::SUCCESS;
-
-        echo "= Filter =\n";
-        $filter = new Filter(new Query\Criterion\ContentTypeIdentifier(['landing_page', 'folder']), [
-            new CustomQuery\SortClause\ContentTypeIdentifier(Query::SORT_DESC),
-            new Query\SortClause\ContentName(Query::SORT_DESC)
-        ]);
-        /** @var Content $content */
-        foreach ($this->contentService->find($filter)->getIterator() as $content) {
-            echo "{$content->getName()} ({$content->getContentType()->getIdentifier()})\n";
-        }
-        /** @var Location $content */
-        foreach ($this->locationService->find($filter)->getIterator() as $content) {
-            echo "{$content->getContentInfo()->getName()} ({$content->getContentInfo()->getContentType()->getIdentifier()})\n";
-        }
-
-        return Command::SUCCESS;
     }
 }
