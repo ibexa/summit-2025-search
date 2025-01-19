@@ -58,6 +58,7 @@ class SearchCommand extends Command
             ],
             //'aggregations' => [new Query\Aggregation\ContentTypeTermAggregation('Content types')],
             'aggregations' => [new CustomQuery\Aggregation\ContentTypeIdentifier('Content types')],
+            'facetBuilders' => [new Query\FacetBuilder\ContentTypeFacetBuilder()],
             'limit' => 100,
         ]);
         /* */
@@ -117,6 +118,11 @@ class SearchCommand extends Command
                 foreach ($aggregation->getEntries() as $entry) {
                     $output->writeln("{$entry->getKey()->getName()} ({$entry->getKey()->getIdentifier()}): {$entry->getCount()}");
                 }
+            }
+        }
+        if (!empty($searchResult->facets)) {
+            foreach ($searchResult->facets as $facet) {
+                dump($facet);
             }
         }
     }
