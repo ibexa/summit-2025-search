@@ -11,7 +11,7 @@ class Wildcard implements EventSubscriberInterface
 {
     private ContentSuggestionSubscriber $originalSubscriber;
 
-    public function __construct(ContentSuggestionSubscriber$originalSubscriber)
+    public function __construct(ContentSuggestionSubscriber $originalSubscriber)
     {
         $this->originalSubscriber = $originalSubscriber;
     }
