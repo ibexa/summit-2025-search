@@ -41,6 +41,7 @@ services:
 
     App\Search\Query\Criterion\Filter\ContentTypeIdentifier:
         decorates: Ibexa\Core\Persistence\Legacy\Filter\CriterionQueryBuilder\Content\Type\IdentifierQueryBuilder
+        #Automatically tagged ServiceTags::FILTERING_CRITERION_QUERY_BUILDER by IbexaCoreExtension::registerForAutoConfiguration
         #tags: [ibexa.filter.criterion.query.builder]
 
     App\Search\Query\Criterion\Legacy\ContentTypeIdentifier:
@@ -62,6 +63,10 @@ services:
         tags:
             - ibexa.search.elasticsearch.query.content.sort_clause.visitor
             - ibexa.search.elasticsearch.query.location.sort_clause.visitor
+
+    #App\Search\Query\SortClause\Filter\ContentTypeIdentifier:
+    #Automatically tagged ServiceTags::FILTERING_SORT_CLAUSE_QUERY_BUILDER by IbexaCoreExtension::registerForAutoConfiguration
+    #    tags: [ibexa.filter.sort_clause.query.builder]
 
     App\Search\Query\SortClause\Legacy\ContentTypeIdentifier:
         tags:
