@@ -39,15 +39,16 @@ services:
         #    - ibexa.search.elasticsearch.query.content.criterion.visitor
         #    - ibexa.search.elasticsearch.query.location.criterion.visitor
 
+    App\Search\Query\Criterion\Filter\ContentTypeIdentifier:
+        decorates: Ibexa\Core\Persistence\Legacy\Filter\CriterionQueryBuilder\Content\Type\IdentifierQueryBuilder
+        #tags: [ibexa.filter.criterion.query.builder]
+
     App\Search\Query\Criterion\Legacy\ContentTypeIdentifier:
         decorates: Ibexa\Core\Search\Legacy\Content\Common\Gateway\CriterionHandler\ContentTypeIdentifier
         #tags:
         #    - ibexa.search.legacy.gateway.criterion_handler.content
         #    - ibexa.search.legacy.gateway.criterion_handler.location
-
-    App\Search\Query\Criterion\Filter\ContentTypeIdentifier:
-        decorates: Ibexa\Core\Persistence\Legacy\Filter\CriterionQueryBuilder\Content\Type\IdentifierQueryBuilder
-        #tags: [ibexa.filter.criterion.query.builder]
+        #    - ibexa.search.legacy.trash.gateway.criterion.handler
 
     App\Search\Query\Criterion\Solr\ContentTypeIdentifier:
         decorates: Ibexa\Solr\Query\Common\CriterionVisitor\ContentTypeIdentifierIn
@@ -59,18 +60,18 @@ services:
 
     App\Search\Query\SortClause\Elasticsearch\ContentTypeIdentifier:
         tags:
-            - ibexa.search.elasticsearch.query.location.sort_clause.visitor
             - ibexa.search.elasticsearch.query.content.sort_clause.visitor
+            - ibexa.search.elasticsearch.query.location.sort_clause.visitor
 
     App\Search\Query\SortClause\Legacy\ContentTypeIdentifier:
         tags:
-            - ibexa.search.legacy.gateway.sort_clause_handler.location
             - ibexa.search.legacy.gateway.sort_clause_handler.content
+            - ibexa.search.legacy.gateway.sort_clause_handler.location
 
     App\Search\Query\SortClause\Solr\ContentTypeIdentifier:
         tags:
-            - ibexa.search.solr.query.location.sort_clause.visitor
             - ibexa.search.solr.query.content.sort_clause.visitor
+            - ibexa.search.solr.query.location.sort_clause.visitor
 
     # Aggregation
 
