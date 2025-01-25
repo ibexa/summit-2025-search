@@ -21,7 +21,6 @@ class ContentTypeIdentifier implements CriterionQueryBuilder
 
     public function buildQueryConstraint(FilteringQueryBuilder $queryBuilder, FilteringCriterion $criterion): ?string
     {
-        //dump('\App\Search\Query\Criterion\Filter\ContentTypeIdentifier::buildQueryConstraint');
         $subSelect = $queryBuilder->getConnection()->createQueryBuilder();
         $subSelect
             ->select(['id'])

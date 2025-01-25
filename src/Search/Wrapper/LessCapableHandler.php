@@ -63,7 +63,6 @@ class LessCapableHandler extends AbstractHandler
                     continue 2;
                 }
             }
-            //dump(get_class($searchEngine), get_parent_class($searchEngine));//DEBUG
 
             return $searchEngine;
         }

@@ -12,12 +12,12 @@ class ContentTypeIdentifier extends CriterionVisitor
 {
     use ContentTypeIdentifierTrait;
 
-    public function canVisit(Criterion $criterion)
+    public function canVisit(Criterion $criterion): bool
     {
         return $criterion instanceof Criterion\ContentTypeIdentifier;
     }
 
-    public function visit(Criterion $criterion, CriterionVisitor $subVisitor = null)
+    public function visit(Criterion $criterion, CriterionVisitor $subVisitor = null): string
     {
         return '(' .
             implode(

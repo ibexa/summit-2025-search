@@ -20,8 +20,7 @@ class ContentTypeIdentifier extends CriterionHandler
 
     public function handle(CriteriaConverter $converter, QueryBuilder $queryBuilder, Criterion $criterion, array $languageSettings)
     {
-        //dump('\App\Search\Query\Criterion\Visitor\Legacy\ContentTypeIdentifier::handle');
-        /* */
+        /* With a subquery * /
         $subSelect = $this->connection->createQueryBuilder();
         $subSelect
             ->select(['id'])
@@ -38,7 +37,7 @@ class ContentTypeIdentifier extends CriterionHandler
             'c.contentclass_id',
             $subSelect->getSQL()
         );
-        /* */
+        /* With a join */
         if (!$this->hasJoinedTableAs($queryBuilder, 'ct')) {
             $queryBuilder->innerJoin(
                 'c',
