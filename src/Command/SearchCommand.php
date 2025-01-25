@@ -44,24 +44,22 @@ class SearchCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $text = implode(' ', $input->getArgument('text'));
-        //$query = new Query(['query' => new Query\Criterion\FullText($text)]);
 
-        //$query = new Query(['filter' => new Query\Criterion\ContentTypeIdentifier('landing_page')]);
-        $query = new LocationQuery(['filter' => new Query\Criterion\ContentTypeIdentifier(['landing_page', 'folder'])]);
-        /* * /
-        //$query = new Query([
         $query = new LocationQuery([
+            //'query' => new Query\Criterion\FullText($text),
             'filter' => new Query\Criterion\ContentTypeIdentifier(['landing_page', 'folder']),
             'sortClauses' => [
-                new CustomQuery\SortClause\ContentTypeIdentifier(),
+                new CustomQuery\SortClause\ContentTypeIdentifier(Query::SORT_DESC),
                 new Query\SortClause\ContentName(),
             ],
-            //'aggregations' => [new Query\Aggregation\ContentTypeTermAggregation('Content types')],
-            'aggregations' => [new CustomQuery\Aggregation\ContentTypeIdentifier('Content types')],
-            'facetBuilders' => [new Query\FacetBuilder\ContentTypeFacetBuilder()],
+            'aggregations' => [
+                new Query\Aggregation\ContentTypeTermAggregation('Content type names'),
+                new CustomQuery\Aggregation\ContentTypeIdentifier('Content type identifiers')
+            ],
+            //'facetBuilders' => [new Query\FacetBuilder\ContentTypeFacetBuilder()],
             'limit' => 100,
+            'offset' => 0,
         ]);
-        /* */
 
         $this->displaySearchResult($this->searchService->findContentInfo($query), $output, 'SearchService::findContentInfo()');
         $this->displaySearchResult($this->searchService->findContent($query), $output, 'SearchService::findContent()');
@@ -71,7 +69,7 @@ class SearchCommand extends Command
 
         $filter = new Filter(new Query\Criterion\ContentTypeIdentifier(['landing_page', 'folder']), [
             new CustomQuery\SortClause\ContentTypeIdentifier(Query::SORT_DESC),
-            new Query\SortClause\ContentName(Query::SORT_DESC)
+            new Query\SortClause\ContentName()
         ]);
 
         $this->displayFilterResult($this->contentService->find($filter), $output, 'ContentService::find()');
