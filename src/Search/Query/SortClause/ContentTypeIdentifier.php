@@ -12,6 +12,6 @@ class ContentTypeIdentifier extends SortClause implements FilteringSortClause
 {
     public function __construct(string $sortDirection = Query::SORT_ASC)
     {
-        parent::__construct('TODO: whatever', $sortDirection);
+        parent::__construct('', $sortDirection);
     }
 }
