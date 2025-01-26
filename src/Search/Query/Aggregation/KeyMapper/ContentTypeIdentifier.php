@@ -11,7 +11,6 @@ use Ibexa\Contracts\Elasticsearch\Query\LanguageFilter;
 use Ibexa\Elasticsearch\Query\ResultExtractor\AggregationResultExtractor\TermAggregationKeyMapper as ElasticsearchTermAggregationKeyMapper;
 use Ibexa\Contracts\Solr\ResultExtractor\AggregationResultExtractor\TermAggregationKeyMapper as SolrTermAggregationKeyMapper;
 
-
 class ContentTypeIdentifier implements ElasticsearchTermAggregationKeyMapper, SolrTermAggregationKeyMapper
 {
     private ContentTypeService $contentTypeService;
